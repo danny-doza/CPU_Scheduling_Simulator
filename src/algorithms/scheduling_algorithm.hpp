@@ -7,6 +7,8 @@
 #include "types/scheduling_decision/scheduling_decision.hpp"
 #include "types/thread/thread.hpp"
 
+using ThreadQueue = std::queue<std::shared_ptr<Thread>>;
+
 /*
     Scheduler:
         Base class for all of the scheduling algorithms.
@@ -30,6 +32,7 @@ public:
             than zero. The default time slice for all preemptive algorithms should be 3.
     */
     int time_slice = -1;
+    ThreadQueue threads;
 
     //==================================================
     //  Member functions

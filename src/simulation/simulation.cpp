@@ -102,7 +102,6 @@ void Simulation::handle_process_arrived(const std::shared_ptr<Event> event)
     	add_event(std::make_shared<Event>(EventType::PROCESS_PREEMPTED, event->time,event->event_num++, 
 						event->thread, event->scheduling_decision));
     }
-	return;
 }
 
 void Simulation::handle_dispatch_completed(const std::shared_ptr<Event> event)
@@ -139,7 +138,6 @@ void Simulation::handle_dispatch_completed(const std::shared_ptr<Event> event)
     
     add_event(std::make_shared<Event>(temp_event_type, event->time + temp_burst->length, event->event_num++, event->thread,
     					event->scheduling_decision));
-    return;
 }
 
 void Simulation::handle_cpu_burst_completed(const std::shared_ptr<Event> event)
@@ -176,11 +174,10 @@ void Simulation::handle_process_completed(const std::shared_ptr<Event> event)
     this->active_thread = nullptr;
     
     if (this->scheduler->get_next_thread() != nullptr) {
-    	add_event(std::make_shared<Event>(EventType::DISPATCHER_INVOKED, event->time, event->event_num++, event->thread, 
+    	add_event(std::make_shared<Event>(EventType::DISPATCHER_INVOKED, event->time, event->event_num++, 
+    						event->thread, 
     						event->scheduling_decision));
     }
-    
-    return;
 }
 
 void Simulation::handle_process_preempted(const std::shared_ptr<Event> event)
@@ -199,7 +196,6 @@ void Simulation::handle_process_preempted(const std::shared_ptr<Event> event)
 	add_event(std::make_shared<Event>(EventType::DISPATCHER_INVOKED, event->time,event->event_num++, 
 						event->thread, event->scheduling_decision));
     }
-    return;
 }
 
 void Simulation::handle_dispatcher_invoked(const std::shared_ptr<Event> event)
@@ -213,29 +209,26 @@ void Simulation::handle_dispatcher_invoked(const std::shared_ptr<Event> event)
     auto temp_scheduling_decision = this->scheduler->get_next_thread();
     if (temp_scheduling_decision == nullptr) {
         this->active_thread = nullptr;
-    } else {
-        this->active_thread = event->thread;
-        if (this->prev_thread != nullptr) {
-	    if (this->active_thread->process_id == this->prev_thread->process_id) {
-		    temp_event_type = EventType::THREAD_DISPATCH_COMPLETED;
-	    } else {
-		    temp_event_type = EventType::PROCESS_DISPATCH_COMPLETED;
-	    }
-        } else {
-            temp_event_type = EventType::PROCESS_DISPATCH_COMPLETED;
-        }
-        auto temp_burst = this->active_thread->get_next_burst(CPU);
-        add_event(std::make_shared<Event>(temp_event_type, event->time + temp_burst->length,
-						event->event_num++, temp_scheduling_decision->thread, temp_scheduling_decision));
     }
+    this->active_thread = temp_scheduling_decision->thread;
+    event->thread = this->active_thread;
+    event->scheduling_decision = temp_scheduling_decision;
+ 
+    auto temp_burst = this->active_thread->get_next_burst(CPU);
+    
+    int added_time = 0;
+    if (temp_burst != nullptr) {
+    	added_time = temp_burst->length;
+    }
+    
+    add_event(std::make_shared<Event>(EventType::PROCESS_DISPATCH_COMPLETED, event->time + added_time,
+					event->event_num++, temp_scheduling_decision->thread, temp_scheduling_decision));
     
     if (this->active_thread == nullptr) {
     	while(true) {
     		continue;
     	}
     }
-    
-    return;
 }
 
 //==============================================================================
