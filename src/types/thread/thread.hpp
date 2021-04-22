@@ -90,7 +90,7 @@ public:
         previous_state:
             The previous state of the thread.
     */
-    ThreadState previous_state;
+    ThreadState prev_state;
 
     /*
         bursts:

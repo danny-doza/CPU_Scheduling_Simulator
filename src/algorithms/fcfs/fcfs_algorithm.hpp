@@ -4,6 +4,8 @@
 #include <memory>
 #include "algorithms/scheduling_algorithm.hpp"
 
+using ThreadQueue = std::queue<std::shared_ptr<Thread>>;
+
 /*
     FCFSScheduler:
         A representation of a scheduling queue that uses first-come, first-served logic.
@@ -22,7 +24,7 @@ public:
     //==================================================
 
     // Add any member variables you may need.
-
+    ThreadQueue threads;
 
     //==================================================
     //  Member functions

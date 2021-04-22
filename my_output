@@ -1,0 +1,31 @@
+SIMULATION COMPLETED!
+
+SYSTEM PROCESSES:
+    Total Count:                  0
+    Avg. response time:        0.00
+    Avg. turnaround time:      0.00
+
+INTERACTIVE PROCESSES:
+    Total Count:                  3
+    Avg. response time:        0.00
+    Avg. turnaround time:      0.00
+
+NORMAL PROCESSES:
+    Total Count:                  4
+    Avg. response time:        0.00
+    Avg. turnaround time:      0.00
+
+BATCH PROCESSES:
+    Total Count:                  0
+    Avg. response time:        0.00
+    Avg. turnaround time:      0.00
+
+Total elapsed time:            100
+Total service time:              0
+Total I/O time:                  0
+Total dispatch time:             0
+Total idle time:                 0
+
+CPU utilization:             0.00%
+CPU efficiency:              0.00%
+

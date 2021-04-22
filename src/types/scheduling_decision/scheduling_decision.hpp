@@ -38,6 +38,8 @@ public:
     */
     int time_slice = -1;
     
+    SchedulingDecision(std::shared_ptr<Thread> thread, std::string explanation, int time_slice):
+        thread(thread), explanation(explanation), time_slice(time_slice) {}
 };
 
 #endif

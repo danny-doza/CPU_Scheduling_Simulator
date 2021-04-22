@@ -188,6 +188,8 @@ public:
             then adds it to the event queue.
     */
     void add_event(std::shared_ptr<Event> event);
+    
+    int grab_correct_index(ProcessPriority priority);
 };
 
 #endif

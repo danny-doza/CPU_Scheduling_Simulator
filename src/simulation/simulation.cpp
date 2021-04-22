@@ -68,9 +68,9 @@ void Simulation::run()
         }
 
         // If this event triggered a state change, print it out.
-        if (event->thread && event->thread->current_state != event->thread->previous_state)
+        if (event->thread && event->thread->current_state != event->thread->prev_state)
         {
-            this->logger.print_state_transition(event, event->thread->previous_state, event->thread->current_state);
+            this->logger.print_state_transition(event, event->thread->prev_state, event->thread->current_state);
         }
         this->system_stats.total_time = event->time;
         event.reset();
@@ -93,44 +93,149 @@ void Simulation::run()
 
 void Simulation::handle_process_arrived(const std::shared_ptr<Event> event)
 {
-    // TODO: Handle this event properly
-    std::cout << "TODO: Handle process arrived event properly\n\n";
+    event->thread->set_state(ThreadState::READY, event->time);
+    this->scheduler->add_to_ready_queue(event->thread);
+    if (this->active_thread == nullptr) {
+	add_event(std::make_shared<Event>(EventType::DISPATCHER_INVOKED, event->time,event->event_num++, 
+						event->thread, event->scheduling_decision));
+    } else {
+    	add_event(std::make_shared<Event>(EventType::PROCESS_PREEMPTED, event->time,event->event_num++, 
+						event->thread, event->scheduling_decision));
+    }
+	return;
 }
 
 void Simulation::handle_dispatch_completed(const std::shared_ptr<Event> event)
 {
-    // TODO: Handle this event properly
-    std::cout << "TODO: Handle dispatch completed event properly\n\n";
+
+    event->thread->set_state(RUNNING, event->time);
+    event->thread->start_time = event->time;
+    this->prev_thread = this->active_thread;
+
+    EventType temp_event_type = PROCESS_ARRIVED;
+    
+    auto temp_burst = this->active_thread->pop_next_burst(CPU);
+    if (this->scheduler->time_slice == -1) {
+    	if (this->active_thread->bursts.empty()) {
+    	    temp_event_type = PROCESS_COMPLETED;
+    	} else {
+    	    temp_event_type = CPU_BURST_COMPLETED;
+    	}
+    	event->thread->service_time += temp_burst->length;
+    	this->system_stats.service_time += temp_burst->length;
+    } else {
+	if (this->scheduler->time_slice < temp_burst->length) {
+	    	temp_event_type = PROCESS_PREEMPTED;
+	} else {
+    	    if (this->active_thread->bursts.empty()) {
+    	        temp_event_type = PROCESS_COMPLETED;
+    	    } else {
+    	        temp_event_type = CPU_BURST_COMPLETED;
+    	    }
+    	    event->thread->service_time += temp_burst->length;
+    	    this->system_stats.service_time += temp_burst->length;
+    	}
+    }
+    
+    add_event(std::make_shared<Event>(temp_event_type, event->time + temp_burst->length, event->event_num++, event->thread,
+    					event->scheduling_decision));
+    return;
 }
 
 void Simulation::handle_cpu_burst_completed(const std::shared_ptr<Event> event)
 {
-    // TODO: Handle this event properly
-    std::cout << "TODO: Handle cpu burst completed event properly\n\n";
+    event->thread->set_state(BLOCKED, event->time);
+    
+    add_event(std::make_shared<Event>(EventType::IO_BURST_COMPLETED, event->time, event->event_num++, event->thread,
+    					event->scheduling_decision));
 }
 
 void Simulation::handle_io_burst_completed(const std::shared_ptr<Event> event)
 {
-    // TODO: Handle this event properly
-    std::cout << "TODO: Handle io burst completed event properly\n\n";
+    event->thread->set_state(READY, event->time);
+    this->scheduler->add_to_ready_queue(event->thread);
+    
+    event->thread->io_time += this->active_thread->bursts.front()->length;
+    
+    this->active_thread->pop_next_burst(event->thread->bursts.front()->burst_type);
+    add_event(std::make_shared<Event>(EventType::DISPATCHER_INVOKED, event->time, event->event_num++, 
+    					event->thread, event->scheduling_decision));
 }
 
 void Simulation::handle_process_completed(const std::shared_ptr<Event> event)
 {
-    // TODO: Handle this event properly
-    std::cout << "TODO: Handle process completed event properly\n\n";
+    event->thread->set_state(EXIT, event->time);
+    event->thread->end_time = event->time;
+
+    this->system_stats.thread_counts[grab_correct_index(this->active_thread->priority)]++;
+    this->system_stats.avg_thread_response_times[grab_correct_index(this->active_thread->priority)] += 
+    	this->active_thread->response_time();
+    this->system_stats.avg_thread_turnaround_times[grab_correct_index(this->active_thread->priority)] += 
+	this->active_thread->turnaround_time();
+    this->prev_thread = this->active_thread;
+    this->active_thread = nullptr;
+    
+    if (this->scheduler->get_next_thread() != nullptr) {
+    	add_event(std::make_shared<Event>(EventType::DISPATCHER_INVOKED, event->time, event->event_num++, event->thread, 
+    						event->scheduling_decision));
+    }
+    
+    return;
 }
 
 void Simulation::handle_process_preempted(const std::shared_ptr<Event> event)
 {
-    // TODO: Handle this event properly
-    std::cout << "TODO: Handle process preempted event properly\n\n";
+    event->thread->set_state(READY, event->time);
+    this->scheduler->add_to_ready_queue(event->thread);
+    if (this->scheduler->time_slice != -1) {
+    	this->active_thread->bursts.front()->update_time(this->scheduler->time_slice);
+    }
+    
+    if (this->active_thread == nullptr) {
+	add_event(std::make_shared<Event>(EventType::DISPATCHER_INVOKED, event->time,event->event_num++, 
+						event->thread, event->scheduling_decision));
+    } else {
+
+	add_event(std::make_shared<Event>(EventType::DISPATCHER_INVOKED, event->time,event->event_num++, 
+						event->thread, event->scheduling_decision));
+    }
+    return;
 }
 
 void Simulation::handle_dispatcher_invoked(const std::shared_ptr<Event> event)
 {
-    // TODO: Handle this event properly
-    std::cout << "TODO: Handle dispatcher invoked event properly\n\n";
+    if (this->active_thread != nullptr) {
+    	this->prev_thread = this->active_thread;
+    }
+    
+    EventType temp_event_type = EventType::PROCESS_ARRIVED;
+    
+    auto temp_scheduling_decision = this->scheduler->get_next_thread();
+    if (temp_scheduling_decision == nullptr) {
+        this->active_thread = nullptr;
+    } else {
+        this->active_thread = event->thread;
+        if (this->prev_thread != nullptr) {
+	    if (this->active_thread->process_id == this->prev_thread->process_id) {
+		    temp_event_type = EventType::THREAD_DISPATCH_COMPLETED;
+	    } else {
+		    temp_event_type = EventType::PROCESS_DISPATCH_COMPLETED;
+	    }
+        } else {
+            temp_event_type = EventType::PROCESS_DISPATCH_COMPLETED;
+        }
+        auto temp_burst = this->active_thread->get_next_burst(CPU);
+        add_event(std::make_shared<Event>(temp_event_type, event->time + temp_burst->length,
+						event->event_num++, temp_scheduling_decision->thread, temp_scheduling_decision));
+    }
+    
+    if (this->active_thread == nullptr) {
+    	while(true) {
+    		continue;
+    	}
+    }
+    
+    return;
 }
 
 //==============================================================================
@@ -139,8 +244,37 @@ void Simulation::handle_dispatcher_invoked(const std::shared_ptr<Event> event)
 
 SystemStats Simulation::calculate_statistics()
 {
-    // TODO: Implement functionality for calculating the simulation statistics
+    for (int i = 0; i < 4; i++) {
+    	if (this->system_stats.thread_counts[i] != 0) {
+    	    this->system_stats.avg_thread_response_times[i] = 
+    		this->system_stats.avg_thread_response_times[i]/this->system_stats.thread_counts[i];
+    	    this->system_stats.avg_thread_turnaround_times[i] = 
+    		this->system_stats.avg_thread_response_times[i]/this->system_stats.thread_counts[i];
+    	}
+    }
+    
     return this->system_stats;
+}
+
+int Simulation::grab_correct_index(ProcessPriority priority) {
+	int index = -1;
+	switch(priority) {
+		case SYSTEM:
+			index = 0;
+			break;
+		case INTERACTIVE:
+			index = 1;
+			break;
+		case NORMAL:
+			index = 2;
+			break;
+		case BATCH:
+			index = 3;
+			break;
+		default:
+			break;
+	}
+	return index;
 }
 
 void Simulation::add_event(std::shared_ptr<Event> event)
@@ -193,7 +327,7 @@ std::shared_ptr<Process> Simulation::read_process(std::istream &input)
 }
 
 std::shared_ptr<Thread> Simulation::read_thread(std::istream &input, int thread_id, int process_id, ProcessPriority priority)
-{
+{   
     // Stuff
     int arrival_time;
     int num_cpu_bursts;
