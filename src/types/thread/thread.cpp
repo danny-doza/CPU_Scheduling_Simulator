@@ -14,7 +14,7 @@ void Thread::set_ready(int time) {
 }
 
 void Thread::set_running(int time) {
-	if ((current_state != ThreadState::NEW) && (current_state != ThreadState::BLOCKED) && (current_state != ThreadState::EXIT)) {
+	if ((current_state != ThreadState::NEW) && (current_state != ThreadState::EXIT)) {
 	    	prev_state = current_state;
   		current_state = ThreadState::RUNNING;
 	} else {
@@ -24,9 +24,9 @@ void Thread::set_running(int time) {
 }
 
 void Thread::set_blocked(int time) {
-	if (current_state == ThreadState::RUNNING) {
+	if ((current_state == ThreadState::RUNNING) || (current_state == ThreadState::BLOCKED)) {
 	    	prev_state = current_state;
-  		current_state = ThreadState::RUNNING;
+  		current_state = ThreadState::BLOCKED;
 	} else {
 		fprintf(stderr, "Invalid BLOCKED state change.");
 		_Exit(EXIT_FAILURE);
@@ -45,15 +45,15 @@ void Thread::set_finished(int time) {
 
 int Thread::response_time() const {
     // TODO
-    return start_time - arrival_time;
-}
-
-int Thread::turnaround_time() const {
     return end_time - arrival_time;
 }
 
+int Thread::turnaround_time() const {
+    return start_time - arrival_time;
+}
+
 void Thread::set_state(ThreadState state, int time) {
-    state_change_time = time;
+    //state_change_time = time;
     switch (state) {
     	case ThreadState::NEW: {
     	    // TODO: File has arrived
@@ -78,11 +78,27 @@ void Thread::set_state(ThreadState state, int time) {
 }
 
 std::shared_ptr<Burst> Thread::get_next_burst(BurstType type) {
+    if ((type == CPU) && (bursts.front()->burst_type == CPU)) {
+    	return bursts.front();
+    } else if ((type == IO) && (bursts.front()->burst_type == IO)) {
+    	return bursts.front();
+    }
     return bursts.front();
 }
 
 std::shared_ptr<Burst> Thread::pop_next_burst(BurstType type) {
-    std::shared_ptr<Burst> temp_burst = bursts.front();
+ /*   if ((type == CPU) && (bursts.front()->burst_type == CPU)) {
+        auto temp_burst = bursts.front();
+        bursts.pop();
+        return temp_burst;
+    } else if ((type == IO) && (bursts.front()->burst_type == IO)) {
+        auto temp_burst = bursts.front();
+        bursts.pop();
+        return temp_burst;
+    }
+    return nullptr; */
+    
+    auto temp_burst = bursts.front();
     bursts.pop();
     return temp_burst;
 }

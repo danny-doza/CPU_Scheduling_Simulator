@@ -22,11 +22,15 @@ std::shared_ptr<SchedulingDecision> FCFSScheduler::get_next_thread() {
     std::shared_ptr<Thread> temp_thread = nullptr;
     std::string explanation = "";
     if (!threads.empty()) {
-    	if (threads.front()->bursts.empty()) {
-    	    temp_thread = threads.front(); // TODO: FIX THIS nullptr CALL
+        temp_thread = threads.front();
+    	if (temp_thread->bursts.empty()) {
     	    threads.pop();
-    	} else {
     	    temp_thread = threads.front();
+    	} else {
+    	    if (temp_thread->current_state == ThreadState::BLOCKED) {
+    	        threads.pop();
+    	        temp_thread = threads.front();
+    	    }
     	}
     } else {
     	temp_thread = nullptr;

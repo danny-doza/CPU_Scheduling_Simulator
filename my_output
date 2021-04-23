@@ -7,25 +7,25 @@ SYSTEM PROCESSES:
 
 INTERACTIVE PROCESSES:
     Total Count:                  3
-    Avg. response time:        0.00
-    Avg. turnaround time:      0.00
+    Avg. response time:     1593.67
+    Avg. turnaround time:    531.22
 
 NORMAL PROCESSES:
     Total Count:                  4
-    Avg. response time:        0.00
-    Avg. turnaround time:      0.00
+    Avg. response time:      931.75
+    Avg. turnaround time:    232.94
 
 BATCH PROCESSES:
     Total Count:                  0
     Avg. response time:        0.00
     Avg. turnaround time:      0.00
 
-Total elapsed time:            100
-Total service time:              0
-Total I/O time:                  0
-Total dispatch time:             0
-Total idle time:                 0
+Total elapsed time:           1895
+Total service time:            628
+Total I/O time:                517
+Total dispatch time:          1225
+Total idle time:                42
 
-CPU utilization:             0.00%
-CPU efficiency:              0.00%
+CPU utilization:            97.78%
+CPU efficiency:             33.14%
 

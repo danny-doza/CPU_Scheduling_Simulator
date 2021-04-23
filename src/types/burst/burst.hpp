@@ -46,6 +46,8 @@ public:
             the you can update a burst's remaining length after it has been preempted.
     */
     void update_time(int delta_t);
+    
+    int get_length();
 };
 
 #endif
