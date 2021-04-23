@@ -56,10 +56,13 @@ void Logger::print_verbose(const std::shared_ptr<Event> event,
   std::string verbose_message = fmt::format("At time {}:\n", event->time);
   verbose_message += fmt::format("    {}\n", EVENT_MAP[event->type]);
   verbose_message +=
-      fmt::format("    Process {} in process {} [{}]\n", thread->thread_id,
-                  thread->process_id, PROCESS_PRIORITY_MAP[thread->priority]);
-  verbose_message += fmt::format("    {}\n\n", message);
-
+      fmt::format("    Process {} [{}]\n", thread->process_id, PROCESS_PRIORITY_MAP[thread->priority]);
+  
+  if (event->type == DISPATCHER_INVOKED) {
+    verbose_message += fmt::format("    {}\n\n", event->scheduling_decision->explanation);
+  } else {
+    verbose_message += fmt::format("    {}\n\n", message);
+  }
   std::cout << verbose_message;
 }
 

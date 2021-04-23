@@ -1,12 +1,154 @@
-10,11c10,11
-<     Avg. response time:     1593.67
-<     Avg. turnaround time:    531.22
+53c53
+<     Process 5 [INTERACTIVE]
 ---
->     Avg. response time:      121.67
->     Avg. turnaround time:   1593.67
-15,16c15,16
-<     Avg. response time:      931.75
-<     Avg. turnaround time:    232.94
+>     Process 3 [NORMAL]
+73c73
+<     Process 3 [NORMAL]
 ---
->     Avg. response time:      216.00
->     Avg. turnaround time:    931.75
+>     Process 4 [INTERACTIVE]
+93c93
+<     Process 4 [INTERACTIVE]
+---
+>     Process 6 [INTERACTIVE]
+113c113
+<     Process 6 [INTERACTIVE]
+---
+>     Process 1 [NORMAL]
+133c133
+<     Process 1 [NORMAL]
+---
+>     Process 2 [NORMAL]
+153c153
+<     Process 2 [NORMAL]
+---
+>     Process 0 [NORMAL]
+173c173
+<     Process 0 [NORMAL]
+---
+>     Process 5 [INTERACTIVE]
+193c193
+<     Process 5 [INTERACTIVE]
+---
+>     Process 3 [NORMAL]
+213,214c213,214
+<     Process 3 [NORMAL]
+<     Selected from 5 processes. Will run to completion of burst.
+---
+>     Process 4 [INTERACTIVE]
+>     Selected from 6 processes. Will run to completion of burst.
+228c228
+<     Process 4 [INTERACTIVE]
+---
+>     Process 6 [INTERACTIVE]
+248c248
+<     Process 6 [INTERACTIVE]
+---
+>     Process 1 [NORMAL]
+268,269c268,269
+<     Process 1 [NORMAL]
+<     Selected from 4 processes. Will run to completion of burst.
+---
+>     Process 2 [NORMAL]
+>     Selected from 5 processes. Will run to completion of burst.
+283c283
+<     Process 2 [NORMAL]
+---
+>     Process 0 [NORMAL]
+303c303
+<     Process 0 [NORMAL]
+---
+>     Process 5 [INTERACTIVE]
+323c323
+<     Process 5 [INTERACTIVE]
+---
+>     Process 4 [INTERACTIVE]
+343c343
+<     Process 4 [INTERACTIVE]
+---
+>     Process 6 [INTERACTIVE]
+363c363
+<     Process 6 [INTERACTIVE]
+---
+>     Process 2 [NORMAL]
+383,384c383,384
+<     Process 2 [NORMAL]
+<     Selected from 3 processes. Will run to completion of burst.
+---
+>     Process 0 [NORMAL]
+>     Selected from 4 processes. Will run to completion of burst.
+398c398
+<     Process 0 [NORMAL]
+---
+>     Process 5 [INTERACTIVE]
+418c418
+<     Process 5 [INTERACTIVE]
+---
+>     Process 4 [INTERACTIVE]
+438c438
+<     Process 4 [INTERACTIVE]
+---
+>     Process 6 [INTERACTIVE]
+458c458
+<     Process 6 [INTERACTIVE]
+---
+>     Process 0 [NORMAL]
+478c478
+<     Process 0 [NORMAL]
+---
+>     Process 5 [INTERACTIVE]
+498c498
+<     Process 5 [INTERACTIVE]
+---
+>     Process 4 [INTERACTIVE]
+518c518
+<     Process 4 [INTERACTIVE]
+---
+>     Process 6 [INTERACTIVE]
+538,539c538,539
+<     Process 6 [INTERACTIVE]
+<     Selected from 2 processes. Will run to completion of burst.
+---
+>     Process 0 [NORMAL]
+>     Selected from 3 processes. Will run to completion of burst.
+553c553
+<     Process 0 [NORMAL]
+---
+>     Process 5 [INTERACTIVE]
+573c573
+<     Process 5 [INTERACTIVE]
+---
+>     Process 4 [INTERACTIVE]
+593,594c593,594
+<     Process 4 [INTERACTIVE]
+<     Selected from 1 processes. Will run to completion of burst.
+---
+>     Process 0 [NORMAL]
+>     Selected from 2 processes. Will run to completion of burst.
+608c608
+<     Process 0 [NORMAL]
+---
+>     Process 5 [INTERACTIVE]
+628c628
+<     Process 5 [INTERACTIVE]
+---
+>     Process 0 [NORMAL]
+648c648
+<     Process 0 [NORMAL]
+---
+>     Process 5 [INTERACTIVE]
+668c668
+<     Process 5 [INTERACTIVE]
+---
+>     Process 0 [NORMAL]
+688,689c688,689
+<     Process 0 [NORMAL]
+<     Selected from 0 processes. Will run to completion of burst.
+---
+>     Process 5 [INTERACTIVE]
+>     Selected from 1 processes. Will run to completion of burst.
+700,704d699
+< 
+< At time 1895:
+<     DISPATCHER_INVOKED
+<     Process 5 [INTERACTIVE]
+<     Selected from -1 processes. Will run to completion of burst.

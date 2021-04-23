@@ -33,6 +33,7 @@ public:
     */
     int time_slice = -1;
     ThreadQueue threads;
+    int num_processes = 0;
 
     //==================================================
     //  Member functions

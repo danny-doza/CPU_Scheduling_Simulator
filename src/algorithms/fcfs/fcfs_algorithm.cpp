@@ -23,19 +23,16 @@ std::shared_ptr<SchedulingDecision> FCFSScheduler::get_next_thread() {
     std::string explanation = "";
     if (!threads.empty()) {
         temp_thread = threads.front();
-    	if (temp_thread->bursts.empty()) {
-    	    threads.pop();
+        threads.pop();
+        
+        if (temp_thread->current_state == ThreadState::BLOCKED) {
     	    temp_thread = threads.front();
-    	} else {
-    	    if (temp_thread->current_state == ThreadState::BLOCKED) {
-    	        threads.pop();
-    	        temp_thread = threads.front();
-    	    }
+    	    threads.pop();
     	}
     } else {
     	temp_thread = nullptr;
     }
-    explanation = "Selected from x processes. Running to completion of burst.";
+    explanation = fmt::format("Selected from {} processes. Will run to completion of burst.", num_processes);
 
     return std::make_shared<SchedulingDecision>(temp_thread, explanation, -1);
 }

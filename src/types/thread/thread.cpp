@@ -45,11 +45,12 @@ void Thread::set_finished(int time) {
 
 int Thread::response_time() const {
     // TODO
-    return end_time - arrival_time;
+    return start_time - arrival_time;
 }
 
 int Thread::turnaround_time() const {
-    return start_time - arrival_time;
+
+    return end_time - arrival_time;
 }
 
 void Thread::set_state(ThreadState state, int time) {
@@ -98,7 +99,13 @@ std::shared_ptr<Burst> Thread::pop_next_burst(BurstType type) {
     }
     return nullptr; */
     
-    auto temp_burst = bursts.front();
-    bursts.pop();
+    std::shared_ptr<Burst> temp_burst = nullptr;
+    if (!bursts.empty()) {
+        temp_burst = bursts.front();
+        bursts.pop();
+    } else {
+        temp_burst = nullptr;
+    }
+
     return temp_burst;
 }

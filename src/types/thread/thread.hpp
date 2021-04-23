@@ -73,6 +73,8 @@ public:
             The time of the last state change.
     */
     int state_change_time = -1;
+    
+    bool first_cpu_run = true;
 
     /*
         priority:

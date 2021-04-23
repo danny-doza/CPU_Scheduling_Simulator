@@ -25,6 +25,8 @@ public:
 
     // Add any member variables you may need.
     ThreadQueue threads;
+    
+    int num_processses = 0;
 
     //==================================================
     //  Member functions

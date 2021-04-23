@@ -29,7 +29,7 @@ Simulation::Simulation(FlagOptions flags)
 void Simulation::run()
 {
     this->read_file(this->flags.filename);
-
+    
     while (!this->events.empty())
     {
         auto event = this->events.top();
@@ -93,6 +93,7 @@ void Simulation::run()
 
 void Simulation::handle_process_arrived(const std::shared_ptr<Event> event)
 {
+    this->scheduler->num_processes++;
     event->thread->set_state(ThreadState::READY, event->time);
     this->scheduler->add_to_ready_queue(event->thread);
     if (this->active_thread == nullptr) {
@@ -107,8 +108,17 @@ void Simulation::handle_dispatch_completed(const std::shared_ptr<Event> event)
     //    return;
     //}
     
+    if (this->active_thread == nullptr) {
+        return;
+    }
+    
     event->thread->set_state(RUNNING, event->time);
-    event->thread->start_time = event->time;
+    
+    if (event->thread->first_cpu_run) {
+        event->thread->start_time = event->time;
+        event->thread->first_cpu_run = false;
+    }
+
     this->prev_thread = this->active_thread;
 
     EventType temp_event_type = PROCESS_ARRIVED;
@@ -148,21 +158,18 @@ void Simulation::handle_dispatch_completed(const std::shared_ptr<Event> event)
 
 void Simulation::handle_cpu_burst_completed(const std::shared_ptr<Event> event)
 {
+    this->active_thread = nullptr;
     event->thread->set_state(BLOCKED, event->time);
-    auto temp_burst = this->active_thread->pop_next_burst(IO);
+    add_event(std::make_shared<Event>(EventType::DISPATCHER_INVOKED, event->time, 
+    					event->event_num+1, event->thread, event->scheduling_decision));
+    					
+    auto temp_burst = event->thread->pop_next_burst(IO);
     if (temp_burst != nullptr) {
         event->thread->io_time += temp_burst->get_length();
         this->system_stats.io_time += temp_burst->get_length();
 
         add_event(std::make_shared<Event>(EventType::IO_BURST_COMPLETED, event->time + temp_burst->length, 
-    					event->event_num++, event->thread, event->scheduling_decision));
-    	
-    	this->active_thread = nullptr;
-    	
-    	//if (!this->scheduler->threads.empty()) {
-            add_event(std::make_shared<Event>(EventType::DISPATCHER_INVOKED, event->time, 
-    					event->event_num++, event->thread, event->scheduling_decision));
-        //}
+    					event->event_num+2, event->thread, event->scheduling_decision));
     }
 }
 
@@ -193,6 +200,7 @@ void Simulation::handle_process_completed(const std::shared_ptr<Event> event)
 	this->active_thread->turnaround_time();
     this->prev_thread = this->active_thread;
     this->active_thread = nullptr;
+    this->scheduler->num_processes--;
     
     //if (!this->scheduler->threads.empty()) {
         //while(true) { continue; }
@@ -215,7 +223,7 @@ void Simulation::handle_process_preempted(const std::shared_ptr<Event> event)
     	this->active_thread->bursts.front()->update_time(this->scheduler->time_slice);
     }
 
-    //this->active_thread = nullptr;
+    
     if (this->active_thread == nullptr) {
         add_event(std::make_shared<Event>(EventType::DISPATCHER_INVOKED, event->time,event->event_num++, 
 						event->thread, event->scheduling_decision));
@@ -235,6 +243,12 @@ void Simulation::handle_dispatcher_invoked(const std::shared_ptr<Event> event)
     }
     
     this->active_thread = temp_scheduling_decision->thread;
+    event->scheduling_decision = temp_scheduling_decision;
+    //event->thread = temp_scheduling_decision->thread;
+    
+    if (this->prev_thread == nullptr) {
+        this->scheduler->num_processes--;
+    }
     
     if (this->active_thread == nullptr) {
         return;
@@ -242,7 +256,7 @@ void Simulation::handle_dispatcher_invoked(const std::shared_ptr<Event> event)
     
     this->system_stats.dispatch_time += this->process_switch_overhead;
     add_event(std::make_shared<Event>(EventType::PROCESS_DISPATCH_COMPLETED, event->time + this->process_switch_overhead,
-					event->event_num++, temp_scheduling_decision->thread, temp_scheduling_decision));
+					event->event_num++, temp_scheduling_decision->thread, event->scheduling_decision));
 }
 
 //==============================================================================
@@ -256,7 +270,7 @@ SystemStats Simulation::calculate_statistics()
     	    this->system_stats.avg_thread_response_times[i] = 
     		this->system_stats.avg_thread_response_times[i]/this->system_stats.thread_counts[i];
     	    this->system_stats.avg_thread_turnaround_times[i] = 
-    		this->system_stats.avg_thread_response_times[i]/this->system_stats.thread_counts[i];
+    		this->system_stats.avg_thread_turnaround_times[i]/this->system_stats.thread_counts[i];
     	}
     }
     
